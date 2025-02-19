@@ -1,3 +1,17 @@
+library(stringr)
+#library(DESeq2)
+library(ggplot2)
+library(dplyr)
+
+
+
+################################################################################
+########### Helper function ####################################################
+################################################################################
+
+gcproc <- function(grna){
+  (stringr::str_count(grna, "G") + stringr::str_count(grna, "C")) / str_length(grna)
+}
 
 
 ################################################################################
@@ -20,59 +34,25 @@ plotSgrnaAbundance <- function(dat){
       sample="treatment"
     )
   )
-  ggplot(df, aes(sample,mean, group=sgrna)) + geom_line() 
+  ggplot(df, aes(sample,mean, group=sgrna)) + geom_line() + theme_bw()
 }
 
 
-#Or CDK1
 
-dat <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/3d_mip_dedup#4000000#0.sgrna_summary.txt",sep="\t")
-p1 <- plotSgrnaAbundance(dat[dat$Gene=="AURKB",]) + xlab("mean, MIP dedup, 3d") + ylab("Rel. abundance")
-dat <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/3d_pcr#4000000#0.sgrna_summary.txt",sep="\t")
-p2 <- plotSgrnaAbundance(dat[dat$Gene=="AURKB",]) + xlab("mean, PCR, 3d") + ylab("Rel. abundance")
-ptot <- egg::ggarrange(p1,p2)
+dat <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/14d_mip_dedup#4000000#0.sgrna_summary.txt",sep="\t")
+dat$control_mean <- dat$control_mean/sum(dat$control_mean)*1e6
+dat$treat_mean <- dat$treat_mean/sum(dat$treat_mean)*1e6
+p1 <- plotSgrnaAbundance(dat[dat$Gene=="CDK1",]) + xlab("MIP dedup") + ylab("Rel. abundance") + ylim(0,400)
+
+dat <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/14d_pcr#4000000#0.sgrna_summary.txt",sep="\t")
+dat$control_mean <- dat$control_mean/sum(dat$control_mean)*1e6
+dat$treat_mean <- dat$treat_mean/sum(dat$treat_mean)*1e6
+p2 <- plotSgrnaAbundance(dat[dat$Gene=="CDK1",]) + xlab("PCR") + ylab("Rel. abundance") + ylim(0,400)
+
+ptot <- egg::ggarrange(p1,p2, nrow = 1)
 ptot 
-ggsave("out/fig4a.svg", ptot, width = 2.5, height = 5)
 
-
-
-
-################## for d14
-if(FALSE){
-  dat1 <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/14d_mip_dedup#4000000#0.sgrna_summary.txt",sep="\t")
-  dat2 <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/14d_pcr#4000000#0.sgrna_summary.txt",sep="\t")
-  df <- merge(
-    data.frame(
-      gene=dat1$Gene,
-      sgrna=dat1$sgrna,
-      log_fc_mipdedup=dat1$LFC,
-      var_mipdedup=dat1$adj_var,
-      cov_mipdedup=sqrt(dat1$adj_var)/(dat1$control_mean+dat1$treat_mean)/2
-    ),
-    data.frame(
-      sgrna=dat2$sgrna,
-      log_fc_pcr=dat2$LFC,
-      var_pcr=dat2$adj_var,
-      cov_pcr=sqrt(dat2$adj_var)/(dat2$control_mean+dat2$treat_mean)/2
-    )
-  )
-  df$gc <- gcproc(df$sgrna)
-  df$is_aurkb <- df$gene=="AURKB"
-  df <- df[order(df$is_aurkb),]
-  ggplot(df, aes(log_fc_mipdedup, log_fc_pcr, color=is_aurkb)) + geom_point() + title("14d 4M reads")
-  ggplot(df, aes(log_fc_mipdedup, log_fc_pcr, color=gc)) + geom_point() + title("14d 4M reads")
-  
-  ggplot(df, aes(var_mipdedup, var_pcr, color=gc)) + geom_point() + title("14d 4M reads")
-  
-  
-  
-  #Coefficient of variation
-  ggplot(df, aes(cov_mipdedup, cov_pcr, color=gc)) + geom_point() + title("14d 4M reads") + scale_x_log10() + scale_y_log10() + xlab("log(FC) MIPdedup, per sgRNA") + xlab("log(FC) PCR, per sgRNA")
-  ggplot(df, aes(cov_mipdedup, cov_pcr, color=is_aurkb)) + geom_point() + title("14d 4M reads") + scale_x_log10() + scale_y_log10() + xlab("log(FC) MIPdedup, per sgRNA") + xlab("log(FC) PCR, per sgRNA")
-  
-  
-}
-
+ggsave("out/fig4a.svg", ptot, width = 5, height = 2.5)
 
 
 
@@ -81,10 +61,6 @@ if(FALSE){
 #################### Get metadata for full-depth samples #######################
 ################################################################################
 
-library(DESeq2)
-library(ggplot2)
-library(stringr)
-library(dplyr)
 
 
 #update later
@@ -114,68 +90,66 @@ samplemeta <- rbind(
 )
 
 ################################################################################
-#################### Get counts for full-depth samples #########################
+############# Fig 4b new : why are padlock and pcr libs different? #############
 ################################################################################
 
-#TODO accidentally put all in padlock dir --- verify; move?
 
+############# Get counts for full-depth sample  (ignore non-dedup)
 alldat <- list()
-basedir <- "/corgi/otherdataset/crispr_padlock/newcount/pcr"
-for(f in list.files(basedir,pattern = "*csv")){
-  dat <- read.csv(file.path(basedir,f))  
-  dat$f <- f
-  alldat[[f]] <- dat
-}
-basedir <- "/corgi/otherdataset/crispr_padlock/newcount/padlock"
-for(f in list.files(basedir,pattern = "*csv")){
-  print(f)
-  dat <- read.csv(file.path(basedir,f))  
-  print(nrow(dat))
-  if(nrow(dat)>0){
-    dat$f <- f
+basedir <- "/corgi/otherdataset/crispr_padlock/subsamp/"
+for(f in list.files(basedir)){
+  if(str_ends(f, fixed("_dedup#allreads#0")) || str_ends(f, fixed("_pcr#allreads#0"))) {   
+    dat <- read.csv(file.path(basedir,f))
+    
+    f <- str_remove(f, fixed("_dedup#allreads#0"))
+    f <- str_remove(f, fixed("_pcr#allreads#0"))
+    print(f)
+
+    dat$filename <- f
     alldat[[f]] <- dat
   }
 }
 dat <- do.call(rbind, alldat)
 
-cnt <- reshape::cast(dat, grna~f, value = "cnt", fill = 0)
-rownames(cnt) <- cnt$grna
-cnt <- cnt[,-1]
+samplemeta <- read.csv("/corgi/otherdataset/crispr_padlock/martin_samplemeta.csv",sep="\t")
+dat <- merge(dat, samplemeta)
 
-grna <- rownames(cnt)
-sn <- colnames(cnt)
-cnt <- as.matrix(cnt)
-rownames(cnt) <- grna
-colnames(cnt) <- sn
+df <- merge(
+  sqldf("select avg(cnt) as cnt_mip, grna from dat where time='14d' and protocol='padlock' group by grna"),
+  sqldf("select avg(cnt) as cnt_pcr, grna from dat where time='14d' and protocol='PCR' group by grna"),
+)
+df$gc <- gcproc(df$grna)  
 
-
-#Organize things in the right order
-rownames(samplemeta) <- samplemeta$filename
-samplemeta <- samplemeta[colnames(cnt),]
-
-#Rename sensibly
-rownames(samplemeta) <- paste(samplemeta$samplename,samplemeta$protocol, samplemeta$dedup, samplemeta$run, samplemeta$library)
-colnames(cnt) <- rownames(samplemeta)
-samplemeta$newname <- rownames(samplemeta)
-
-samplemeta$num_read <- colSums(cnt)
-samplemeta$num_gene <- colSums(cnt!=0)
-
-#Remove poorly covered samples
-unique(samplemeta$library)
-keepsample <- samplemeta$num_read > 100 & samplemeta$library=="Brunello-kinome"   # all but two have coverage
-cnt <- cnt[,keepsample]
-samplemeta <- samplemeta[keepsample,]
-dim(cnt)
-
-all(rowSums(cnt)>0) #actually, yes!
+p1 <- ggplot(df, aes(cnt_pcr, cnt_mip, color=gc)) + 
+  geom_point() + 
+  scale_x_log10()+
+  scale_y_log10()+
+  theme_bw()+
+  xlab("PCR abundance") + 
+  ylab("MIP dedup abundance")+
+  scale_color_gradientn(colors = c("red","gray","blue"),values=c(0,0.5,1))+
+  geom_abline(intercept = -1.8, slope = 1)
 
 
-dds <- DESeqDataSetFromMatrix(countData = as.matrix(cnt),
-                              colData = samplemeta,
-                              design= ~ 1)
-dds <- DESeq(dds)
-ncnt <- counts(dds, normalized=TRUE)
+df <- merge(
+  sqldf("select avg(cnt) as cnt_mip, grna from dat where time='lib' and protocol='padlock' group by grna"),
+  sqldf("select avg(cnt) as cnt_pcr, grna from dat where time='lib' and protocol='PCR' group by grna"),
+)
+df$gc <- gcproc(df$grna)  
+
+p2 <- ggplot(df, aes(cnt_pcr, cnt_mip, color=gc)) + 
+  geom_point() + 
+  scale_x_log10()+
+  scale_y_log10()+
+  theme_bw()+
+  xlab("PCR abundance") + 
+  ylab("MIP dedup abundance")+
+  scale_color_gradientn(colors = c("red","gray","blue"),values=c(0,0.5,1))+
+  geom_abline(intercept = -0.05, slope = 1)
+
+
+ptot <- egg::ggarrange(p1,p2, nrow=1)
+ggsave(plot = ptot, "out/fig4b_new.svg", width = 7, height = 3)
 
 
 
@@ -190,8 +164,6 @@ df <- data.frame(
   grna=rownames(cnt)
 )
 df$gc <- gcproc(df$grna)  
-#ggplot(df, aes(pcr, padlock, label=grna, color=gc)) + geom_point() #+ geom_text()
-#ggplot(df, aes(log10(1+pcr), log10(1+padlock), color=gc)) + geom_point()
 ggplot(df, aes(pcr, padlock, label=grna, color=gc)) + 
   geom_point() + 
   scale_x_log10() + scale_y_log10() +
@@ -202,26 +174,71 @@ ggsave("out/fig4b.svg", width = 5, height = 3)
 
 
 
-if(FALSE){
-  df[df$pcr>15000,,drop=FALSE]
-  #ATCCTAAGAAGAAATATACA  much much higher in PCR. always?
-  
-  geneinfo[geneinfo$grna=="ATCCTAAGAAGAAATATACA",]
-  #PAK1
-  
-}
-
-
-
-
-
 ################################################################################
-########### Helper function ####################################################
+################## fig1e efficiency vs padlock amount ##########################
 ################################################################################
 
-gcproc <- function(grna){
-  (stringr::str_count(grna, "G") + stringr::str_count(grna, "C")) / str_length(grna)
+
+#Only get subset of samples that are relevant
+samplemeta_conc <- samplemeta_padlock_dedup[
+    str_starts(samplemeta_padlock_dedup$filename,"padlock_A") | str_starts(samplemeta_padlock_dedup$filename,"padlock_B") | str_starts(samplemeta_padlock_dedup$filename,"padlock_C") |
+       samplemeta_padlock_dedup$library=="GFPg1"
+    ,]
+
+#Confirmed number of cells to be correct. 150k for gfp, 1M for other efficiency test
+samplemeta_conc$conc <- as.double(str_split_i(str_split_i(samplemeta_conc$samplename,"gDNA_",2),"_",1))
+
+
+alldf <- NULL
+for(i in 1:nrow(samplemeta_conc)){
+  
+  ftemp <- samplemeta_conc$filename[i]
+  ftemp <- str_remove(ftemp, fixed(".dedup.csv"))
+  ftemp <- paste0(ftemp, "_dedup#allreads#0")
+  cur_file <- file.path("/corgi/otherdataset/crispr_padlock/subsamp",ftemp) 
+  dat_dedup <- read.csv(cur_file)
+  nrow(dat_dedup)
+  
+  ftemp <- samplemeta_conc$filename[i]
+  ftemp <- str_remove(ftemp, fixed(".dedup.csv"))
+  ftemp <- paste0(ftemp, "_nodedup#allreads#0")
+  cur_file <- file.path("/corgi/otherdataset/crispr_padlock/subsamp",ftemp)
+  dat_nodedup <- read.csv(cur_file)
+  
+
+  num_reads <- sum(dat_nodedup$cnt)
+  cnt_dedup <- sum(dat_dedup$cnt)
+  num_cells <- samplemeta_conc$cells[i]
+  
+  should_obs <- length(unique(sample(x = 1:num_cells, size = num_reads, replace = TRUE)))
+  
+  
+  alldf <- rbind(
+    alldf,
+    data.frame(
+      filename=samplemeta_conc$filename[i], 
+      cnt_dedup=cnt_dedup,                     
+      num_reads=num_reads,
+      should_obs=should_obs
+    )
+  )
+  
 }
+alldf$ratio <- alldf$cnt_dedup/alldf$should_obs
+alldf <- merge(samplemeta_conc,alldf)
+
+alldf$is_digested <- !str_detect(alldf$treatment, "non-digested")
+alldf$conc[alldf$library=="GFPg1"] <- 0.02
+
+alldf
+
+ggplot(alldf, aes(conc, ratio*100,color=is_digested, shape=library)) +   
+  geom_point() + 
+  scale_x_log10() + 
+  theme_bw() +
+  ylab("% captured") + 
+  xlab("pM padlock")
+ggsave("newout/fig1e.svg", width = 4, height = 2.5)
 
 
 
@@ -251,31 +268,14 @@ df <- merge(
 df <- merge(df, gene_gc) ####### missing!
 df$is_aurkb <- df$gene=="AURKB"
 df <- df[order(df$is_aurkb),]
-#ggplot(df, aes(log_fc_mipdedup, log_fc_pcr, color=is_aurkb)) + geom_point() + title("14d 4M reads") + xlab("log(FC) MIPdedup, per gene") + ylab("log(FC) PCR, per gene")
 ggplot(df, aes(log_fc_mipdedup, log_fc_pcr, color=gc)) + 
   geom_point() + title("14d 4M reads") + 
   xlab("log(FC) MIPdedup, per gene") + ylab("log(FC) PCR, per gene") +
   scale_color_gradientn(colors = c("red","gray","blue"),values=c(0,0.5,1))+
   theme(axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
-        #panel.grid.minor = element_blank(),
-        #panel.border = element_blank(),
         panel.background = element_blank())
 ggsave("out/fig4c.svg", width = 3.5, height = 3)
-
-
-if(FALSE){
-  ####### Look at the details
-  dat <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/14d_mip_dedup#4000000#0.gene_summary.txt",sep="\t")
-  dat[dat$id=="CDK1",]
-  dat <- read.csv("/corgi/otherdataset/crispr_padlock/for_mageck/14d_pcr#4000000#0.gene_summary.txt",sep="\t")
-  dat[dat$id=="CDK1",]
-  #Similar pos.lfc; but very different pos.fdr  and pos.p.value
-}
-
-
-
-
 
 
 
@@ -428,8 +428,6 @@ sn_param <- extractSECdistr(mod)
 
 df$lfc <- rsn(nrow(df), xi=sn_param@dp["xi"], omega=sn_param@dp["omega"], alpha=sn_param@dp["alpha"])
 
-#ggplot(df, aes(lfc+LFC.pred, gc)) + geom_bin2d() + geom_point(mapping=aes(LFC.pred, gc))
-#ggplot(df, aes(LFC.pred, gc)) + geom_point(mapping=aes(LFC.pred, gc))
 
 ######################## Plot fitted model
 ggplot(allf_avg, aes(LFC,gc.jitter)) + 
@@ -481,8 +479,6 @@ predLfcCompensation <- function(gc){
 
 allf_avg$LFC_corrected <- allf_avg$LFC - predLfcCompensation(allf_avg$gc)
 
-#allf_avg$LFC_corrected <- corrected_lfc$LFC - predLfcCompensation(allf_avg$gc) ########## original and wrong
-
 ggplot(allf_avg, aes(LFC_corrected,gc.jitter)) + 
   geom_bin2d(bins = 50) + 
   xlab("Average LFC, DepMap, 356 screens v1.0 set -- GC corrected") + 
@@ -515,9 +511,6 @@ ggplot(gene_avg_lfc, aes(LFC_uncorr, LFC_corr, label=Gene)) + geom_point(color="
   xlab("LFC uncorrected") + ylab("LFC corrected")
 ggsave("out/fig4i.svg", width=5, height=4)
 
-
-#ggplot(gene_avg_lfc, aes(LFC_uncorr, LFC_corr, label=Gene, color=log10(sgrna_cnt))) + geom_point() + 
-#  ggrepel::geom_text_repel(data=gene_avg_lfc[gene_avg_lfc$mispredicted,], color="red", max.overlaps = 1000, segment.colour="black")
 
 gene_avg_lfc$sgrna_cnt.jitter <- gene_avg_lfc$sgrna_cnt + runif(nrow(gene_avg_lfc), -0.5,0.5)
 ggplot(gene_avg_lfc, aes(delta, sgrna_cnt.jitter, label=Gene)) + 

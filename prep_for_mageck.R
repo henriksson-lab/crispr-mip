@@ -66,6 +66,108 @@ list_lib_mip_dedup <- samplemeta[samplemeta$treatment=="plasmid_lib" & samplemet
 list_lib_mip_nodedup <- samplemeta[samplemeta$treatment=="plasmid_lib" & samplemeta$library=="Brunello-kinome" & samplemeta$protocol=="padlock" & !samplemeta$dedup,]$filename
 
 
+#PCR library: #note, 4 of them. no reseq
+samplemeta[samplemeta$filename %in% list_lib_pcr,] 
+
+#MIP library: #note, 4 of them. no reseq
+samplemeta[samplemeta$filename %in% list_lib_mip_dedup,] 
+
+#14d: there is reseq for PCR! but not mip. 
+samplemeta[samplemeta$filename %in% list_14d_pcr_normoxia,] 
+samplemeta[samplemeta$filename %in% list_14d_mip_nodedup_normoxia,] 
+
+
+################################################################################
+######### Quality control - check sample similarity using UMAP #################
+################################################################################
+
+if(FALSE){
+  all_cnt <- NULL
+  for(fname in list.files(countdir,pattern = "*allreads*")){
+    thefile <- file.path(countdir, fname)
+    onecnt <- read.csv(thefile)
+    onecnt$filename <- fname
+    all_cnt[[fname]] <- onecnt
+  }
+  all_cnt <- do.call(rbind, all_cnt)
+  all_cnt$filename <- paste0(str_split_i(all_cnt$f,fixed("#"),1),".csv")
+  rownames(all_cnt) <- NULL
+  
+  #Make a count matrix, normalize to 1
+  all_cnt_mat <- acast(all_cnt, filename ~ grna, value.var = "cnt", fill = 0)
+  for(i in 1:nrow(all_cnt_mat)){
+    all_cnt_mat[i,] <- all_cnt_mat[i,]/sum(all_cnt_mat[i,])
+  }
+
+  #Compare samples
+  the_umap <- umap(all_cnt_mat)
+  
+  samplemeta_umap <- merge(samplemeta, 
+                           data.frame(
+                             umap_x = the_umap$layout[,1],
+                             umap_y = the_umap$layout[,2],
+                             filename = rownames(the_umap$layout)
+                           ))
+  
+  # list_lib_pcr
+  #TODO why no PCR??
+  
+  ggplot(samplemeta_umap[samplemeta_umap$protocol=="PCR",], aes(umap_x, umap_y, label=samplename, color=paste(protocol,dedup,library))) + geom_point() + geom_text()
+  
+  ggplot(samplemeta_umap, aes(umap_x, umap_y, label=samplename, color=paste(protocol,dedup,library))) + geom_point() + geom_text()
+  ggplot(samplemeta_umap, aes(umap_x, umap_y, label=samplename, color=paste(treatment,time,library))) + geom_point() + geom_text()  
+}
+
+
+if(FALSE){
+  ### How similar are two random samples?
+  f1 <- read.csv(file.path(countdir, "P29968_1013_S13_L001_R1_001.fastq.gz#3000000#0"))
+  colnames(f1) <- c("grna","f1")
+  f2 <- read.csv(file.path(countdir, "P29968_1013_S13_L001_R1_001.fastq.gz#3000000#1"))
+  colnames(f2) <- c("grna","f2")
+  f12 <- merge(f1,f2, all=TRUE)
+  ggplot(f12,aes(f1,f2)) + geom_point()
+}
+
+
+################################################################################
+### Supplemental figure: comparison of mageck count with our counting method ###
+################################################################################
+
+cnt_py <- read.csv(file.path(countdir, "Brunello_kinome_1_S5_merged_R1_001.fastq.gz#allreads#0"))
+colnames(cnt_py) <- c("grna","cnt_py")
+cnt_mageck <- read.csv("/corgi/otherdataset/crispr_padlock/compare_mageck.out/sample1.count.txt",sep="\t")#[,c(1,3)]
+colnames(cnt_mageck) <- c("grna","gene","cnt_mageck")
+
+compcnt <- merge(cnt_py, cnt_mageck)
+compcnt$diff <- abs(log10(compcnt$cnt_py) - log10(compcnt$cnt_mageck))
+
+ggplot(compcnt, aes(cnt_py,cnt_mageck, label=gene)) + 
+  geom_point(color="gray") + scale_x_log10() + scale_y_log10() +
+  geom_text(data=compcnt[compcnt$diff>0.3,]) + 
+  theme_bw() +
+  xlab("Our counting method")+
+  ylab("MAGeCK count")
+ggsave("newout/mageck_count.svg", width = 5, height = 5)
+
+compcnt[compcnt$diff>0.3,]
+
+
+# grna cnt_py   gene cnt_mageck      diff
+# 592  AGTCCACCGTCGTGTTCACG     11 FGFRL1         63 0.7579479
+# 1693 GATAATATGTTTCATGGACT  20653  MORN2       8740 0.3734717  *********** much higher count in python !
+# 2019 GGAGCGTGGAGTCGTCACTT     69   CIB1        205 0.4729048
+# 2032 GGAGTGTGACTACCGTCGTG    422  ADCK4       3260 0.8879051
+# 2035 GGATAATATGTTTCATGGAC     50  MORN2       7406 2.1706137
+# 2068 GGCACTTAGTAAAGTCAGTG     45   TPK1         19 0.3744589
+# 2634 TCTCATAAAGCCATTCAATG      3 PAPSS1          1 0.4771213
+
+#Brunello_kinome_1_S5_merged_R1_001.fastq.gz
+#mageck count  --list-seq ../mageck_list_grna.txt    --fastq ../fastq/Brunello_kinome_1_S5_merged_R1_001.fastq.gz  --norm-method none
+#read.csv("/corgi/otherdataset/crispr_padlock/compare_mageck.out/sample1.count.txt",sep="\t")
+
+
+
 
 ################################################################################
 ######### Prepare grna info in mageck format - functions #######################
@@ -179,6 +281,10 @@ getSampAvail <- function(mletable){
 
 ########## Write count files for mageck
 writeMageckOut <- function(comparison_name, listA, listB){
+  
+  #comparison_name <- "14d_pcr"
+  #listA <- list_14d_pcr_normoxia
+  #listB <- list_lib_pcr
   
   
   ####### Can run comparison if listA and listB has at least one sample!
@@ -297,10 +403,17 @@ writeMageckOut <- function(comparison_name, listA, listB){
     all_cmd_jacks <- c(all_cmd_jacks, one_cmd)
   }
 
+  replacenullempty <- function(x) if(is.null(x)) "" else x
+  
+  all_cmd_mageck_mle <- replacenullempty(all_cmd_mageck_mle)
+  all_cmd_mageck <- replacenullempty(all_cmd_mageck)
+  all_cmd_jacks <- replacenullempty(all_cmd_jacks)
+  
   writeLines(all_cmd_mageck_mle, file.path(dir_mageck, paste0(comparison_name, ".mle.sh")))
-  writeLines(all_cmd_mageck, file.path(dir_mageck, paste0(comparison_name, ".mageck.sh")))
+  writeLines(all_cmd_mageck, file.path(dir_mageck, paste0(comparison_name, ".mageck.sh"))) #mageck test
   writeLines(all_cmd_jacks, file.path(dir_mageck, paste0(comparison_name, ".jacks.sh")))
 }
+
 
 
 ################################################################################
@@ -360,3 +473,76 @@ writeMageckOut(
 
 
 
+
+
+
+################################################################################
+######### Efficiency of MIP capture ############################################
+################################################################################
+
+
+dir_subsamp <- "/corgi/otherdataset/crispr_padlock/subsamp"
+
+out_summary <- NULL
+#listsum <- list.files(dir_subsamp, pattern = "*15000000#0")
+listsum <- list.files(dir_subsamp, pattern = "*allreads#0")
+for(f in listsum){
+  curcond <- str_split_fixed(f,"#",3)[1]
+  numread <- as.integer(str_split_fixed(f,"#",3)[2])  #if NA, then this is max reads
+  print(f)
+  
+  dat <- read.csv(file.path(dir_subsamp, f),sep=",")
+  
+  df <- data.frame(
+    cond=curcond,
+    num_umi=sum(dat$cnt)
+  )
+  out_summary <- rbind(df, out_summary)
+}
+#out_summary[str_detect(out_summary$cond,"P29968_1001"),] 
+
+
+out_summary$filename <- paste0(out_summary$cond,".csv")
+
+#out_summary$filename <- out_summary$cond 
+#out_summary$filename[str_detect(out_summary$filename,"dedup")] <- paste0(out_summary$filename[str_detect(out_summary$filename,"dedup")],".csv")
+#out_summary$filename[str_detect(out_summary$filename,"nodedup")] <- paste0(out_summary$filename[str_detect(out_summary$filename,"nodedup")],".csv")
+#out_summary$filename[!str_detect(out_summary$filename,"dedup")] <- paste0(out_summary$filename[!str_detect(out_summary$filename,"dedup") & !str_detect(out_summary$filename,"dedup")],"_dedup.csv")
+
+head(samplemeta_padlock_nodedup)
+
+####################### Analyze for 3d and 14d sample
+out_summary_sub <- merge(samplemeta_padlock_dedup, out_summary)
+
+out_summary_sub <- out_summary_sub[,c("samplename","time","cells","protocol","dedup","num_umi")]
+out_summary_sub$eff <- out_summary_sub$num_umi/out_summary_sub$cells
+
+out_summary_sub[out_summary_sub$time %in% c("3d","14d"),]
+#13%  ... with all reads!
+#3.8% with 100k reads
+#8.6% with 1M reads
+#12.1% with 10M reads
+#13.0% with 15M reads
+#14.6% with all reads reads
+
+mean(out_summary[out_summary$time %in% c("3d","14d"),]$eff)
+
+
+
+
+####################### Analyze for digested DNA sample
+out_summary_sub <- merge(samplemeta, out_summary)
+
+out_summary_sub <- out_summary_sub[,c("filename","samplename","time","cells","protocol","dedup","num_umi","treatment")]
+out_summary_sub$cells <- 150e3 ## error in samplemeta
+out_summary_sub$eff <- out_summary_sub$num_umi/out_summary_sub$cells
+
+out_summary_sub[out_summary_sub$treatment %in% c("digested_gDNA","non-digested_gDNA") & out_summary_sub$dedup,]
+#13%  ... with all reads!
+#3.8% with 100k reads
+#8.6% with 1M reads
+#12.1% with 10M reads
+#13.0% with 15M reads
+#14.6% with all reads reads
+
+mean(out_summary[out_summary$time %in% c("3d","14d"),]$eff)
