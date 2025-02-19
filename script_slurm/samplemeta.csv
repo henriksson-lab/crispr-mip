@@ -1,0 +1,67 @@
+filename	protocol	seq_platform	run	cells	ug_dna	library	reseq_sample	samplename	treatment	time	replicate
+A701-D_S1_L001_R1_001.fastq.gz	padlock	MiSeq	1	150000	1	GFPg1		digested_gDNA	digested_gDNA	gDNA	
+A702-ND_S2_L001_R1_001.fastq.gz	padlock	MiSeq	1	150000	1	GFPg1		non-digested_gDNA	non-digested_gDNA	gDNA	
+P29968_1001_S1_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		hypoxia_3d_rep1	hypoxia	3d	rep1
+P29968_1002_S2_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		hypoxia_3d_rep2	hypoxia	3d	rep2
+P29968_1003_S3_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		hypoxia_3d_rep3	hypoxia	3d	rep3
+P29968_1004_S4_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_3d_rep1	normoxia	3d	rep1
+P29968_1005_S5_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_3d_rep2	normoxia	3d	rep2
+P29968_1006_S6_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_3d_rep3	normoxia	3d	rep3
+P29968_1007_S7_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_14d_rep1	normoxia	14d	rep1
+P29968_1008_S8_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_14d_rep2	normoxia	14d	rep2
+P29968_1009_S9_L001_R1_001.fastq.gz	padlock	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_14d_rep3	normoxia	14d	rep3
+padlock_1_R1_001.fastq.gz	padlock	NextSeq 500/550	2	1000000	7	Brunello		digested_gDNA_rep1	digested_gDNA	gDNA	rep1
+padlock_2_R1_001.fastq.gz	padlock	NextSeq 500/550	2	1000000	7	Brunello		digested_gDNA_rep2	digested_gDNA	gDNA	rep2
+padlock_A_1_S1_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.002_rep1	non-digested_gDNA	gDNA	rep1
+padlock_A_2_S2_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.002_rep2	non-digested_gDNA	gDNA	rep2
+padlock_A_3_S3_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.002_rep3	non-digested_gDNA	gDNA	rep3
+padlock_B_1_S4_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.02_rep1	non-digested_gDNA	gDNA	rep1
+padlock_B_2_S5_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.02_rep2	non-digested_gDNA	gDNA	rep2
+padlock_B_3_S6_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.02_rep3	non-digested_gDNA	gDNA	rep3
+padlock_C_1_S7_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.2_rep1	non-digested_gDNA	gDNA	rep1
+padlock_C_2_S8_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.2_rep2	non-digested_gDNA	gDNA	rep2
+padlock_C_3_S9_R1_001.fastq.gz	padlock	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_0.2_rep3	non-digested_gDNA	gDNA	rep3
+pBK1_S1_R1_001.fastq.gz	padlock	NextSeq 500/550	5		0.2	Brunello-kinome		plasmid_lib_rep1	plasmid_lib	lib	rep1
+pBK2_S2_R1_001.fastq.gz	padlock	NextSeq 500/550	5		0.2	Brunello-kinome		plasmid_lib_rep2	plasmid_lib	lib	rep2
+pBK3_S3_R1_001.fastq.gz	padlock	NextSeq 500/550	5		0.2	Brunello-kinome		plasmid_lib_rep3	plasmid_lib	lib	rep3
+pN3_2_S4_R1_001.fastq.gz	padlock	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1005_S5_L001_R1_001.fastq.gz	normoxia_3d_rep2	normoxia	3d	rep2
+Brunello_1_S1_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello		plasmid_lib_rep1	plasmid_lib	lib	rep1
+Brunello_2_S2_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello		plasmid_lib_rep2	plasmid_lib	lib	rep2
+Brunello_3_S3_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello		plasmid_lib_rep3	plasmid_lib	lib	rep3
+Brunello_4_S4_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello		plasmid_lib_rep4	plasmid_lib	lib	rep4
+Brunello_kinome_1_S5_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello-kinome		plasmid_lib_rep1	plasmid_lib	lib	rep1
+Brunello_kinome_2_S6_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello-kinome		plasmid_lib_rep2	plasmid_lib	lib	rep2
+Brunello_kinome_3_S7_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello-kinome		plasmid_lib_rep3	plasmid_lib	lib	rep3
+Brunello_kinome_4_S8_merged_R1_001.fastq.gz	PCR	NextSeq 500/550	2		0.2	Brunello-kinome		plasmid_lib_rep4	plasmid_lib	lib	rep4
+N3_1_S5_R1_001.fastq.gz	PCR	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1013_S13_L001_R1_001.fastq.gz	normoxia_3d_rep1	normoxia	3d	rep1
+N3_2_S6_R1_001.fastq.gz	PCR	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1014_S14_L001_R1_001.fastq.gz	normoxia_3d_rep2	normoxia	3d	rep2
+N3_3_S7_R1_001.fastq.gz	PCR	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1015_S15_L001_R1_001.fastq.gz	normoxia_3d_rep3	normoxia	3d	rep3
+N14_1_S8_R1_001.fastq.gz	PCR	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1016_S16_L001_R1_001.fastq.gz	normoxia_14d_rep1	normoxia	14d	rep1
+N14_2_S9_R1_001.fastq.gz	PCR	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1017_S17_L001_R1_001.fastq.gz	normoxia_14d_rep2	normoxia	14d	rep2
+N14_3_S10_R1_001.fastq.gz	PCR	NextSeq 500/550	5	1500000	10.1	Brunello-kinome	P29968_1018_S18_L001_R1_001.fastq.gz	normoxia_14d_rep3	normoxia	14d	rep3
+P29968_1010_S10_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		hypoxia_3d_rep1	hypoxia	3d	rep1
+P29968_1011_S11_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		hypoxia_3d_rep2	hypoxia	3d	rep2
+P29968_1012_S12_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		hypoxia_3d_rep3	hypoxia	3d	rep3
+P29968_1013_S13_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_3d_rep1	normoxia	3d	rep1
+P29968_1014_S14_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_3d_rep2	normoxia	3d	rep2
+P29968_1015_S15_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_3d_rep3	normoxia	3d	rep3
+P29968_1016_S16_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_14d_rep1	normoxia	14d	rep1
+P29968_1017_S17_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_14d_rep2	normoxia	14d	rep2
+P29968_1018_S18_L001_R1_001.fastq.gz	PCR	NextSeq 2000	4	1500000	10.1	Brunello-kinome		normoxia_14d_rep3	normoxia	14d	rep3
+PCR_1_R1_001.fastq.gz	PCR	NextSeq 500/550	2	1000000	7	Brunello		non-digested_gDNA_rep1	non-digested_gDNA	gDNA	rep1
+PCR_1_S10_R1_001.fastq.gz	PCR	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_rep1	non-digested_gDNA	gDNA	rep1
+PCR_2_R1_001.fastq.gz	PCR	NextSeq 500/550	2	1000000	7	Brunello		non-digested_gDNA_rep2	non-digested_gDNA	gDNA	rep2
+PCR_2_S11_R1_001.fastq.gz	PCR	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_rep2	non-digested_gDNA	gDNA	rep2
+PCR_3_S12_R1_001.fastq.gz	PCR	NextSeq 500/550	3	1000000	7	Brunello		non-digested_gDNA_rep3	non-digested_gDNA	gDNA	rep3
+t0_PCR_1_S4_R1_001.fastq.gz	PCR	NextSeq 500/550	8	1	1	Brunello-kinome		t0_pcr_rep1	gDNA	lib	rep1
+t0_PCR_1_S4_R2_001.fastq.gz	PCR	NextSeq 500/550	8	1	1	Brunello-kinome		t0_pcr_rep1	gDNA	lib	rep1
+t0_PCR_2_S5_R1_001.fastq.gz	PCR	NextSeq 500/550	8	1	1	Brunello-kinome		t0_pcr_rep2	gDNA	lib	rep2
+t0_PCR_2_S5_R2_001.fastq.gz	PCR	NextSeq 500/550	8	1	1	Brunello-kinome		t0_pcr_rep2	gDNA	lib	rep2
+t0_PCR_3_S6_R1_001.fastq.gz	PCR	NextSeq 500/550	8	1	1	Brunello-kinome		t0_pcr_rep3	gDNA	lib	rep3
+t0_PCR_3_S6_R2_001.fastq.gz	PCR	NextSeq 500/550	8	1	1	Brunello-kinome		t0_pcr_rep3	gDNA	lib	rep3
+t0_padlock_1_S1_R1_001.fastq.gz	padlock	NextSeq 500/550	8	1	1	Brunello-kinome		t0_mip_rep1	gDNA	lib	rep1
+t0_padlock_1_S1_R2_001.fastq.gz	padlock	NextSeq 500/550	8	1	1	Brunello-kinome		t0_mip_rep1	gDNA	lib	rep1
+t0_padlock_2_S2_R1_001.fastq.gz	padlock	NextSeq 500/550	8	1	1	Brunello-kinome		t0_mip_rep2	gDNA	lib	rep2
+t0_padlock_2_S2_R2_001.fastq.gz	padlock	NextSeq 500/550	8	1	1	Brunello-kinome		t0_mip_rep2	gDNA	lib	rep2
+t0_padlock_3_S3_R1_001.fastq.gz	padlock	NextSeq 500/550	8	1	1	Brunello-kinome		t0_mip_rep3	gDNA	lib	rep3
+t0_padlock_3_S3_R2_001.fastq.gz	padlock	NextSeq 500/550	8	1	1	Brunello-kinome		t0_mip_rep3	gDNA	lib	rep3
